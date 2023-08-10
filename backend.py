@@ -90,18 +90,7 @@ def create_employee():
                  manager_id,
                  department_id
              ])
-            #  cursor.callproc('SP_NEW_HIRE',[
-            #      345,
-            #      'Suzie',
-            #      'Wang',
-            #      'helloworld',
-            #      '4565456555',
-            #      today_date,
-            #      'SA_REP',
-            #      23000,
-            #      100,
-            #      50
-            #  ])
+          
              conn.commit()
 
         return jsonify({'message': 'Employee created successfully.'}), 200
