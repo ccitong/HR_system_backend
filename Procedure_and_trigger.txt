@@ -1,0 +1,91 @@
+--Add a new hire--
+
+create or replace PROCEDURE sp_new_hire (
+    p_employee_id   IN hr_employees.employee_id%TYPE,
+    p_first_name    IN hr_employees.first_name%TYPE,
+    p_last_name     IN hr_employees.last_name%TYPE,
+    p_email         IN hr_employees.email%TYPE,
+    p_phone         IN hr_employees.phone_number%TYPE,
+    p_hire_date     IN hr_employees.hire_date%TYPE,
+    p_job_id        IN hr_employees.job_id%TYPE,
+    p_salary        IN hr_employees.salary%TYPE,
+    p_manager_id    IN hr_employees.manager_id%TYPE,
+    p_department_id IN hr_employees.department_id%TYPE
+) AS
+BEGIN
+    INSERT INTO hr_employees (
+        employee_id,
+        first_name,
+        last_name,
+        email,
+        phone_number,
+        hire_date,
+        job_id,
+        salary,
+        manager_id,
+        department_id
+    ) VALUES (
+        p_employee_id,
+        p_first_name,
+        p_last_name,
+        p_email,
+        p_phone,
+        p_hire_date,
+        p_job_id,
+        p_salary,
+        p_manager_id,
+        p_department_id
+    );
+
+
+
+    commit;
+
+
+
+END;
+
+--Update a current Employee
+
+create or replace PROCEDURE sp_update_employee (
+    p_employee_id IN HR_employees.employee_id%TYPE,
+   p_email       IN HR_employees.email%TYPE,
+   p_phone       IN HR_employees.phone_number%TYPE, 
+    p_salary      IN HR_employees.salary%TYPE 
+) AS 
+BEGIN
+   UPDATE Hr_Employees 
+   set salary = p_salary,
+        phone_number = p_phone, 
+        email = p_email
+    where employee_id = p_employee_id;
+
+ 
+commit;
+END;
+
+--check salary --
+
+create or replace PROCEDURE sp_check_salary (
+p_the_job Varchar2,
+p_the_salary Number)
+AS
+ v_minsal hr_jobs.min_salary%type;
+ v_maxsal hr_jobs.max_salary%type;
+BEGIN
+    select min_salary, max_salary INTO v_minsal, v_maxsal from HR_jobs
+    where job_id = UPPER(p_the_job);
+    IF p_the_salary NOT BETWEEN v_minsal AND v_maxsal THEN
+    RAISE_APPLICATION_ERROR(-20100, 'Invalid salary $' || p_the_salary || '.  ' || 'Salaries for job ' || p_the_job ||
+    ' must be between $' || v_minsal || ' and $' || v_maxsal);
+    END IF;
+END;
+
+--Trigger--
+
+create or replace TRIGGER check_salary_trg
+BEFORE INSERT OR UPDATE OF job_id, salary ON hr_employees
+FOR EACH ROW
+BEGIN
+    sp_check_salary(:new.job_id, :new.salary);
+END;
